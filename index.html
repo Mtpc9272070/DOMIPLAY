@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMIPLAY - Iniciar Sesión</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Un gris suave */
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Degradado morado-azul */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen gradient-bg p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center transform transition-all duration-300 hover:scale-105">
+        <img src="https://placehold.co/150x150/667eea/ffffff?text=DOMIPLAY" alt="Logo DOMIPLAY" class="mx-auto mb-6 rounded-full shadow-lg">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido a DOMIPLAY</h1>
+        <p class="text-gray-600 mb-8">Inicia sesión para acceder a tu cuenta y empezar a jugar.</p>
+
+        <button id="google-signin-btn" class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 w-full mb-4 focus:outline-none focus:ring-4 focus:ring-blue-300">
+            <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.24 10.27v2.4h6.66c-.24 1.44-1.12 3.06-2.81 4.26-.06.06-.12.12-.18.18l2.09 1.93c1.24-1.14 2.22-2.82 2.72-4.83h.01c.26-1.11.41-2.31.41-3.51a10.057 10.057 0 00-.01-.79l-.04-.5-.07-.58H12.24z" fill="#4285F4"/>
+                <path d="M6.3 16.68c-.84-1.38-1.3-2.98-1.3-4.68s.46-3.3 1.3-4.68l-2.09-1.62c-1.2 1.94-1.89 4.14-1.89 6.3s.69 4.36 1.89 6.3l2.09-1.62z" fill="#FBBC05"/>
+                <path d="M12.24 6.13c1.78 0 3.32.73 4.49 1.76l1.82-1.82c-1.34-1.25-3.08-2.04-4.78-2.04-3.64 0-6.73 2.15-8.2 5.27l2.09 1.62c.86-2.04 2.92-3.45 5.5-3.45z" fill="#EA4335"/>
+                <path d="M12.24 18.87c-2.45 0-4.52-1.32-5.75-3.23l-2.09 1.62c1.47 3.12 4.56 5.27 8.2 5.27 2.7 0 5.06-1.02 6.78-2.77l-2.09-1.93c-1.17 1.03-2.61 1.7-4.69 1.7z" fill="#34A853"/>
+            </svg>
+            Inicia sesión con Google
+        </button>
+
+        <div id="loading-spinner" class="hidden flex items-center justify-center text-gray-500 mt-4">
+            <svg class="animate-spin h-5 w-5 mr-3 text-blue-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Cargando...
+        </div>
+
+        <div id="message-box" class="hidden mt-4 p-3 rounded-lg text-sm text-red-700 bg-red-100"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyC0gAh2mdp6l9ZopJZspl6DtKFYzaM9PEo",
+  authDomain: "domiplay-baa44.firebaseapp.com",
+  projectId: "domiplay-baa44",
+  storageBucket: "domiplay-baa44.firebasestorage.app",
+  messagingSenderId: "824845731528",
+  appId: "1:824845731528:web:328f45a44c5d6aeca187fd",
+  measurementId: "G-1F2Y4J96B3"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+        // Sign in anonymously if no custom token is provided (for local testing/unauthenticated access)
+        async function authenticateUser() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                    console.log('Signed in with custom token.');
+                } else {
+                    await signInAnonymously(auth);
+                    console.log('Signed in anonymously.');
+                }
+            } catch (error) {
+                console.error("Error during initial authentication:", error);
+            }
+        }
+        authenticateUser(); // Call immediately to ensure auth is ready
+
+        // Google Sign-In Provider
+        const provider = new GoogleAuthProvider();
+        const adminEmail = "admin@domiplay.com"; // Correo electrónico del administrador
+
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const messageBox = document.getElementById('message-box');
+
+        function showLoading() {
+            googleSignInBtn.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            googleSignInBtn.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+        }
+
+        function showMessage(message, isError = true) {
+            messageBox.textContent = message;
+            if (isError) {
+                messageBox.classList.remove('bg-green-100', 'text-green-700');
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                messageBox.classList.remove('bg-red-100', 'text-red-700');
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            }
+            messageBox.classList.remove('hidden');
+        }
+
+        function hideMessage() {
+            messageBox.classList.add('hidden');
+        }
+
+        googleSignInBtn.addEventListener('click', async () => {
+            showLoading();
+            hideMessage();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // User signed in successfully, onAuthStateChanged will handle redirection
+            } catch (error) {
+                console.error("Error durante el inicio de sesión con Google:", error);
+                let errorMessage = "Ocurrió un error al iniciar sesión. Por favor, inténtalo de nuevo.";
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = "Se cerró la ventana emergente de inicio de sesión. Por favor, inténtalo de nuevo.";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = "Ya hay una ventana emergente de inicio de sesión abierta. Por favor, complétala.";
+                }
+                showMessage(errorMessage);
+                hideLoading();
+            }
+        });
+
+        // This listener will trigger whenever the authentication state changes (login, logout)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                const userId = user.uid;
+                const userEmail = user.email;
+                const userName = user.displayName;
+                const userPhoto = user.photoURL;
+
+                console.log("Usuario autenticado:", user.uid, user.email);
+
+                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/private`, 'profile'); // Private user data
+                const userPublicDocRef = doc(db, `artifacts/${appId}/public/data`, 'usuarios', userId); // Public user data (for shared data)
+
+                try {
+                    const docSnap = await getDoc(userPublicDocRef);
+
+                    if (userEmail === adminEmail) {
+                        // Es el administrador
+                        await setDoc(userPublicDocRef, {
+                            uid: userId,
+                            email: userEmail,
+                            name: userName,
+                            photoURL: userPhoto,
+                            role: "admin",
+                            lastLogin: new Date().toISOString()
+                        }, { merge: true });
+                        console.log("Redirigiendo a dashboard de administrador...");
+                        window.location.href = 'admin-dashboard.html';
+                    } else if (docSnap.exists()) {
+                        // El usuario ya existe en Firestore
+                        const userData = docSnap.data();
+                        console.log("Usuario existente:", userData);
+
+                        // Update last login time
+                        await setDoc(userPublicDocRef, {
+                            lastLogin: new Date().toISOString()
+                        }, { merge: true });
+
+                        if (userData.role) {
+                            if (userData.role === 'cliente') {
+                                console.log("Redirigiendo a dashboard de cliente...");
+                                window.location.href = 'cliente-dashboard.html';
+                            } else if (userData.role === 'domiciliario') {
+                                console.log("Redirigiendo a dashboard de domiciliario...");
+                                window.location.href = 'domiciliario-dashboard.html';
+                            } else {
+                                // Rol desconocido o incompleto, redirigir a completar perfil
+                                console.log("Rol desconocido o incompleto, redirigiendo a completar perfil...");
+                                window.location.href = 'completar-perfil.html';
+                            }
+                        } else {
+                            // Usuario existe pero no tiene rol, o perfil incompleto
+                            console.log("Usuario sin rol definido, redirigiendo a completar perfil...");
+                            window.location.href = 'completar-perfil.html';
+                        }
+                    } else {
+                        // Nuevo usuario, pedir el rol
+                        console.log("Nuevo usuario, solicitando rol...");
+
+                        // Presentar la opción de rol (puedes usar un modal personalizado o prompt)
+                        let role = null;
+                        while (!role || (role !== 'cliente' && role !== 'domiciliario')) {
+                            const selectedRole = prompt("¡Bienvenido! ¿Eres 'cliente' o 'domiciliario'? (Escribe 'cliente' o 'domiciliario')");
+                            if (selectedRole) {
+                                role = selectedRole.toLowerCase();
+                            }
+                            if (!role || (role !== 'cliente' && role !== 'domiciliario')) {
+                                alert("Por favor, introduce 'cliente' o 'domiciliario' para continuar.");
+                            }
+                        }
+
+                        // Guardar datos iniciales y rol en Firestore
+                        await setDoc(userPublicDocRef, {
+                            uid: userId,
+                            email: userEmail,
+                            name: userName,
+                            photoURL: userPhoto,
+                            role: role,
+                            createdAt: new Date().toISOString(),
+                            lastLogin: new Date().toISOString()
+                        }, { merge: true }); // Use merge: true to avoid overwriting if partial data exists
+
+                        // Crear un documento 'profile' en la colección privada para el usuario
+                        await setDoc(userDocRef, {
+                            uid: userId,
+                            email: userEmail,
+                            name: userName,
+                            photoURL: userPhoto,
+                            role: role,
+                            createdAt: new Date().toISOString(),
+                            lastLogin: new Date().toISOString()
+                        }, { merge: true });
+
+                        console.log("Rol guardado, redirigiendo a completar perfil...");
+                        window.location.href = 'completar-perfil.html';
+                    }
+                } catch (firestoreError) {
+                    console.error("Error al acceder a Firestore:", firestoreError);
+                    showMessage("Error al cargar los datos del usuario. Por favor, intenta de nuevo.");
+                    hideLoading(); // Ensure loading is hidden on Firestore error
+                }
+            } else {
+                // User is signed out.
+                console.log("Usuario no autenticado.");
+                hideLoading(); // Ensure loading is hidden if not authenticated
+                // No redirect here, stay on login page
+            }
+        });
+    </script>
+</body>
+</html>
